@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
 
@@ -8,23 +8,41 @@ def login(request):
         'username': 'python',
         'password': 'django'
     }
+
+    context = {
+        'method': request.method,
+        'is_valid': True
+    }
+
     if (request.method =='GET') :
-        return render(request, 'pybo/login.html')
+        return render(request, 'pybo/login.html', context)
 
     if (request.method=='POST'):
-        username= request.POST.get('username')
+        username = request.POST.get('username')
         password = request.POST.get('password')
-        print(username, password)
+
         if username =='':
-            return HttpResponse('유저 아이디를 입력해주세요.')
+            context['is_valid'] = False
         if password =='':
-            return HttpResponse('유저 비밀번호를 입력해주세요.')
+            context['is_valid'] = False
 
         if (username != user_data['username']):
-            return HttpResponse('유저 아이디가 올바르지 않습니다.')
+            context['is_valid'] = False
 
         if (password != user_data['password']):
-            return HttpResponse('유저 비밀번호가 올바르지 않습니다.')
+            context['is_valid'] = False
 
-        return render(request, 'pybo/login-success.html')
-    return HttpResponse()
+        if context['is_valid'] :
+            response = redirect('pages:index')
+            response.set_cookie('is_login', True)
+            response.set_cookie('username', user_data['username'])
+            response.set_cookie('password', user_data['password'])
+
+            return response
+        return render(request, 'pybo/login.html', context)
+
+def login_detail(request, id):
+    return HttpResponse('user id 는' + str(id) + '입니다.')
+
+def index(request) :
+    return render(request,'index.html')
