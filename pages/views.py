@@ -4,7 +4,7 @@ def index(request):
 
     context = {
         "is_login" : False,
-        "username" : None,
+        "username": None,
         "password" : None
     }
 
